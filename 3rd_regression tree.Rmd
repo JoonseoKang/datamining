@@ -1,0 +1,161 @@
+---
+title: "3rd_datamining"
+author: "junseo"
+date: "2018년 3월 23일"
+output: html_document
+---
+##의사결정나무 읽기
+{성=Female}이면 Yhat=171.8 {성=male,나이<=26}이면 yhat=163.47  
+  
+
+##CART
+classification And Regreesion Tree  
+맨아래있는걸 stump라고 함    
+  
+
+##실습
+```{r}
+library(MASS)
+library(tree)
+## iris data
+# plot inputs
+data(iris)
+plot(iris[,1:4], col=as.integer(iris$Species),
+pch=substring((iris$Species),1,1))
+
+# fit a tree
+ir.tr = tree(Species ~., iris)
+summary(ir.tr)
+ir.tr
+
+# show the fitted tree
+plot(ir.tr)
+text(ir.tr, all = T)
+
+# remove nodes 12 and 7
+ir.tr1 = snip.tree(ir.tr, nodes = c(12, 7))
+# show the snipped tree
+plot(ir.tr1)
+text(ir.tr1, all = T)
+# show the partition 
+par(pty = "s")
+plot(iris[, 3],iris[, 4], type="n",
+xlab="petal length", ylab="petal width")
+text(iris[, 3], iris[, 4], c("s", "c", "v")[iris[, 5]])
+partition.tree(ir.tr1, add = TRUE, cex = 1.5)
+```
+  
+    
+```{r}
+# prune the tree using missclassification error
+ir.tr2 = prune.misclass(ir.tr)
+plot(ir.tr2)
+fin.tr = prune.misclass(ir.tr, best=4)
+plot(fin.tr)
+text(fin.tr, all = T)
+
+ir.tr2
+
+```
+데이터를 얼마나 잘 구별했는지 확인  
+  
+```{r}
+# polished tree diagram
+install.packages("party")
+library("party")
+iris_ctree = ctree(Species~., data=iris)
+print(iris_ctree)
+plot(iris_ctree, type="simple")
+```
+분리점 값이 2.4가아니라 1.9로 다름  
+  
+```{r}
+#install.packages("Rcmdr") 클릭기반으로 활용할 수 있음
+library(Rcmdr)
+```
+  
+    
+## 백포도주의 품질 평가: MLR
+```{r}
+### 자료 준비 및 탐색
+setwd("C:/Users/KGU/Desktop")
+wine = read.csv("whitewines.csv")
+str(wine)
+hist(wine$quality)
+summary(wine)
+
+## 자료 분할
+wine_train = wine[1:3750, ]
+wine_test = wine[3751:4898, ]
+```
+  
+  
+```{r}
+### 훈련
+library(rpart)
+m.rpart = rpart(quality ~ ., data = wine_train)
+
+## 기본정보
+m.rpart
+
+## 보다 자세한 정보
+summary(m.rpart)
+
+## 시각화
+library(rpart.plot)
+rpart.plot(m.rpart, digits = 3)
+rpart.plot(m.rpart, digits = 4, fallen.leaves = TRUE, type = 3, extra = 101)
+
+### 모형평가
+## 시험자료에서의 예측
+p.rpart = predict(m.rpart, wine_test)
+
+## 예측값과 실제값의 비교
+summary(p.rpart)
+summary(wine_test$quality)
+cor(p.rpart, wine_test$quality) #상관계수가 약50%
+
+```
+train,test 바꾸면 값 바뀜  
+  
+  
+##motorcycle
+```{r}
+library(MASS)
+library(tree)
+data(mcycle)
+mcycle
+str(mcycle)
+
+plot(accel~times,data=mcycle)
+# lm(accel~times,)
+abline(-53.008,1.091,col="Red")
+```
+비선형임  
+  
+```{r}
+### 의사결정나무 적합
+mct = tree(accel ~ times, data=mcycle)
+mct
+plot(mct, col=8)
+text(mct, cex=.75) 
+```
+  
+  
+```{r}
+## 자료와 적합된 함수
+x=c(1:6000)
+x=x/100
+y1=seq(-4.357,-4.357,length.out=1510)
+y2=seq(-39.120,-39.120,length.out=140)
+y3=seq(-86.31,-86.31,length.out=300)
+y4=seq(-114.7,-114.7,length.out=490)
+y5=seq(-42.49,-42.49,length.out=300)
+y6=seq(10.25,10.25,length.out=240)
+y7=seq(40.72,40.72,length.out=520)
+y8=seq(3.291,3.291,length.out=2500)
+y=c(y1,y2,y3,y4,y5,y6,y7,y8)
+plot(accel~times,data=mcycle)
+lines(y~x)
+```
+
