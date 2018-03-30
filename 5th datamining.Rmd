@@ -1,0 +1,74 @@
+---
+title: "5th class"
+author: "junseo"
+date: "2018년 3월 30일"
+output: html_document
+---
+#회귀분석  
+  
+##- 연속형 반응변수
+  
+##- 범주형 설명변수 활용
+  
+##- 범주형 반응변수: 로지스틱 회귀분석(softmax)  
+https://www.google.co.kr/search?q=logistic+regression&source=lnms&tbm=isch&sa=X&ved=0ahUKEwigxu-C5JLaAhXIybwKHcQzDUMQ_AUICigB&biw=1280&bih=907  
+MLE중요, binary에 집중  
+softmax regression  
+https://www.google.co.kr/search?biw=1280&bih=907&tbm=isch&sa=1&ei=GoS9Wu3_G8eD8wXOk4TADg&q=softmax+regression&oq=softmax+re&gs_l=psy-ab.3.0.0i19k1.3019.3326.0.4665.3.2.0.1.1.0.142.259.0j2.2.0....0...1c.1.64.psy-ab..0.3.273...0j0i30k1.0.DKtYwchBCbE  
+multinomial에 집중  
+  
+로지스틱 독성실험 예시
+```{r}
+#회귀분석
+x <- rep(1:4,each=4)
+y <- c(0,0,0,0,1,0,0,0,0,1,1,1,1,1,1,1)
+data.frame(x,y)
+lm(y~x)
+#산점도
+plot(x,y,col="red")
+#기울기 추가
+abline(-0.375,0.350)
+```
+x가 증가할때 y가 증가하는 것을 보여주고 싶음  
+fitting이 잘 안되는것 처럼 보임(잔차 커보임)  
+확률이 증가한다는것을 보여주고싶음  
+y가 연속이 아닌데 연속으로 놓고 하면 해석할때 이상함  
+
+##cross entropy
+https://cdn-images-1.medium.com/max/1600/0*YRAt7P06fL7TObX-.png  
+yhat이 p자리  
+  
+##Y~Bernoullli(p)  
+최대화말고 음수를 붙여서 최소화하는 p를 찾을 수 도 있음  
+Y~Be(P(xi))로 쓰면 xi의 값에 따라 yi가 변하는 걸 설명  
+```{r}
+#독성실험 예제 
+#로지스틱 회귀
+glm(y~x, family = "binomial")
+```
+절편-6.867 기울기 2.747  
+f(x) = -6.867+2.747x  
+f는 score funtion 선형아님  
+p(x) = 1/(1+exp^(-f(x)))  
+```{r}
+# fx <- -6.867+2.747*c(0,1,1.5,2,2.5,3,3.5,4)
+# px <- 1/(1+exp(-fx))
+# plot(px)
+z <- seq(0,4,0.01)
+fx <- -6.867+2.747*z
+px <- 1/(1+exp(-fx))
+plot(x,y)
+points(z,px,col="red",type = "l")
+```
+Classification(분류)
+우리가 관찰하는건 0or1 (죽거나 살거나, 비가 오거나 안오거나)  
+```{r}
+a <- 1:4
+ff <- -6.867+2.747*a
+pp <- 1/(1+exp(-ff))
+aa <- data.frame("x"=a,"phat"=pp)
+aa$yhat <- ifelse(aa$phat>0.5,1,0)
+aa
+```
+phat 0.5 기준으로 phat>0.5 -> yhat=1   
+x=1 4개 x=2 4개 x3=4개 x4=4개  
