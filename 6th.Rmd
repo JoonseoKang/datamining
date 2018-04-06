@@ -1,0 +1,129 @@
+---
+title: "6th class"
+author: "junseo"
+date: "2018년 4월 6일"
+output: html_document
+---
+• 다음의 코드를 이용하여 자료를 생성하라.    
+w = rnorm(500) 
+z = rnorm(500) 
+w2 = w^2 
+x = (-1 + 3*w2 - 1*z) 
+p = exp(x) / (1 + exp(x)) 
+y = rbinom(500, size=1, prob=p)
+```{r}
+set.seed(1)
+w = rnorm(500) 
+z = rnorm(500) 
+w2 = w^2 
+x = (-1 + 3*w2 - 1*z) 
+p = exp(x) / (1 + exp(x)) 
+y = rbinom(500, size=1, prob=p)
+df <- data.frame(y,w)
+```
+  
+  
+```{r}
+# fit y vs w
+fit <- glm(y~w, family = "binomial")
+
+#모형기술
+summary(fit)
+fit
+#f(w)=0.46488-0.02789w
+# 해석: w가 한 단위 증가하면 f(w) (score)가 0.02789만큼 감소한다
+
+#p(w)=p(y=1|w)을 w를 x축으로 하여 그려라
+plot(w,y) #w값이 정렬이 안되어 있음
+sw <- sort(w)
+
+fw <- 0.46488 -0.02789*sw 
+pw <- 1/(1+exp(-fw))
+
+plot(sw,pw, ylim=c(0.3,0.7))
+plot(sw,pw, ylim=c(0.55,0.65))
+plot(sw,pw, ylim=c(0.58,0.64))
+#점점 직선에서 휘어짐
+# w의 계수가 작음(거의 영향이 없음)
+
+fw2 <- 0.46488 -0.2789*sw 
+pw2 <- 1/(1+exp(-fw2))
+plot(sw,pw2)
+
+
+fw3 <- 0.46488 -2.789*sw 
+pw3 <- 1/(1+exp(-fw3))
+plot(sw,pw3)
+
+fw4 <- 0.46488 +2.789*sw  #부호 +
+pw4 <- 1/(1+exp(-fw4))
+plot(sw,pw4)
+
+#w의 효과가 있다 없다 생각할때 계수가 0인것을 가정
+#절편만 있는 모형
+#p(w) 확률이 상수로 됌
+
+fw5 <- 0.46488 -0*sw 
+pw5 <- 1/(1+exp(-fw5))
+plot(sw,pw5)
+
+#w가 커지면 서서히 증가하다 급격히 증가하다 다시 서서히
+
+#절편만 모형을 돌리는거
+fit2 <- glm(y ~ 1, family = "binomial")
+#모형 f(w)= 0.4642, w에 상관없이 항상 0.4642, w는 영향을 못 미침
+log(307/193)
+#0.4642 = log(307/193)
+#log((307/500) <- p(y=1) /(193/500) <-p(y=0) 로그오즈비
+
+
+#예측 yhat 1 if p(w)>=0.5  yhat 0 if p(w)<0.5   0.5는 cut-off, threshold
+#  yhat 0    1
+# y    
+# 0   정분류      193
+# 1       정분류  307
+#                 500
+
+#정분류말고 오분류되는 자료가 상당할 것이라고 예상
+# (w값이 작을거라고 예상되니깐)
+
+
+fw <- 0.46488 -0.02789*w 
+pw <- 1/(1+exp(-fw))
+yhat <- ifelse(pw>0.5,1,0)
+table(y,yhat) #0으로 예측 되는게 없음
+range(pw) #확률이 다 0.5보다 큼
+
+yhat2 <- ifelse(pw>0.6,1,0)
+table(y,yhat2) 
+
+```
+table1 정확도= 307/500  
+table2 정확도= 296/500  
+
+```{r}
+data(iris)
+ iris2 = subset(iris, Species !="virginica")
+ iris2$Species = factor(iris2$Species)
+ plot(iris2)
+ fit <- glm(Species~Petal.Length, 
+            family="binomial", data=iris2)
+x <- iris$Species
+fx <- -96.12 +39.07*iris2$Petal.Length 
+pw <- 1/(1+exp(-fx))
+yhat <- ifelse(pw>0.5,1,0)
+table(iris2$Species,yhat)
+data.frame(iris2$Species,yhat)
+```
+정확도= 100/100  
+회귀 계수들만 보고 판단을 하는건 위험함 scatter plot같은거 봐야함  
+Warning messages:  
+1: glm.fit: 알고리즘이 수렴하지 않았습니다   
+2: glm.fit: 적합된 확률값들이 0 또는 1 입니다  
+이런 경고뜨면 조심!  
+유의성검정이랑 산점도  
+0이 setosa
+  
+    
+https://hackernoon.com/challenges-in-deep-learning-57bbf6e73bb  
+줄 그은게 로지스틱 회귀분석 하겠다는거
